@@ -1,0 +1,37 @@
+
+:root{
+	--bg-from: #e6eefc; /* softer light blue */
+	--bg-mid: #eef4ff;
+	--bg-to: #fbfdff;   /* almost white */
+	--frame-color: rgba(79,70,229,0.12); /* indigo-600 soft */
+	--frame-accent: rgba(79,70,229,0.22);
+}
+
+body{
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	min-height: 100vh;
+	margin: 0;
+	background: linear-gradient(180deg, var(--bg-from) 0%, var(--bg-mid) 55%, var(--bg-to) 100%);
+	position: relative;
+}
+
+
+.glass-card{
+	background: rgba(255,255,255,0.95);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	box-shadow: 0 10px 30px rgba(16,24,40,0.08);
+	border-radius: 1rem;
+	border: 1px solid rgba(16,24,40,0.04);
+}
+
+
+
+/* small utility for glass cards used in the UI */
+.glass-card{
+	background: rgba(255,255,255,0.85);
+	backdrop-filter: blur(6px);
+	box-shadow: 0 6px 18px rgba(16,24,40,0.08);
+	border-radius: 1rem;
+}

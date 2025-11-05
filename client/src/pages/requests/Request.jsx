@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from '../../components/layout/Sidebar'
 import API from '../../api/axios'
 import { toast } from 'react-toastify'
+import { useAuth } from '../../context/AuthContext'
 
 const RequestCard = ({ request, type, onAccept, onReject, onCancel }) => {
   const formatDate = (date) => {
@@ -96,6 +97,12 @@ const Request = () => {
   const [incomingRequests, setIncomingRequests] = useState([])
   const [outgoingRequests, setOutgoingRequests] = useState([])
   const [loading, setLoading] = useState(true)
+  const { clearNotifications } = useAuth()
+
+  useEffect(() => {
+    // Clear notifications when the component mounts
+    clearNotifications()
+  }, [clearNotifications])
 
   const fetchRequests = async () => {
     try {

@@ -1,21 +1,16 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 
-// Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '30d'
   });
 };
 
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
 export const register = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
-    // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
@@ -24,7 +19,6 @@ export const register = async (req, res) => {
       });
     }
 
-    // Create user
     const user = await User.create({
       fullName,
       email,
@@ -53,14 +47,10 @@ export const register = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -68,7 +58,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // Check for user and include password
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
@@ -77,7 +66,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // Check if password matches
     const isPasswordMatch = await user.comparePassword(password);
     if (!isPasswordMatch) {
       return res.status(401).json({
@@ -108,9 +96,6 @@ export const login = async (req, res) => {
   }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -127,9 +112,6 @@ export const getMe = async (req, res) => {
   }
 };
 
-// @desc    Update user profile
-// @route   PUT /api/auth/profile
-// @access  Private
 export const updateProfile = async (req, res) => {
   try {
     const { fullName, email, notificationsEnabled, avatar } = req.body;

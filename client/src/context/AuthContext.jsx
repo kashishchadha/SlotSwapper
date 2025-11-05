@@ -16,6 +16,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [notifications, setNotifications] = useState(0);
+  const [lastChecked, setLastChecked] = useState(Date.now());
 
   // Check if user is logged in on mount
   useEffect(() => {
@@ -37,6 +39,43 @@ export const AuthProvider = ({ children }) => {
 
     checkAuth();
   }, []);
+
+  // Poll for new notifications every 30 seconds
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const checkNotifications = async () => {
+      try {
+        const { data } = await API.get('/swaps/incoming');
+        if (data.success) {
+          const newRequests = data.requests.filter(
+            req => new Date(req.createdAt).getTime() > lastChecked
+          );
+          
+          if (newRequests.length > 0) {
+            setNotifications(prev => prev + newRequests.length);
+            newRequests.forEach(req => {
+              toast.info(`🔔 New swap request from ${req.requester?.fullName}`, {
+                position: 'top-right',
+                autoClose: 5000,
+              });
+            });
+            setLastChecked(Date.now());
+          }
+        }
+      } catch (error) {
+        console.error('Error checking notifications:', error);
+      }
+    };
+
+    // Check immediately on mount
+    checkNotifications();
+
+    // Then check every 30 seconds
+    const interval = setInterval(checkNotifications, 30000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, lastChecked]);
 
   const login = async (email, password) => {
     try {
@@ -89,14 +128,20 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const clearNotifications = () => {
+    setNotifications(0);
+  };
+
   const value = {
     user,
     loading,
     isAuthenticated,
+    notifications,
     login,
     register,
     logout,
-    updateUser
+    updateUser,
+    clearNotifications
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

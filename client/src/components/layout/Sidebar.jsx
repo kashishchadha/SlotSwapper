@@ -5,10 +5,13 @@ import { useAuth } from '../../context/AuthContext'
 export default function Sidebar({ open = false, onClose = () => {} }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, logout } = useAuth()
+  const { user, logout, notifications, clearNotifications } = useAuth()
 
   const handleNavigation = (path) => {
     navigate(path)
+    if (path === '/request') {
+      clearNotifications()
+    }
     onClose() // Close mobile drawer after navigation
   }
 
@@ -55,9 +58,14 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
           </button>
           <button 
             onClick={() => handleNavigation('/request')}
-            className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${isActive('/request') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 hover:scale-105 text-gray-700'}`}
+            className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 relative ${isActive('/request') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 hover:scale-105 text-gray-700'}`}
           >
             🔄 Requests
+            {notifications > 0 && (
+              <span className="absolute top-1 right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                {notifications > 9 ? '9+' : notifications}
+              </span>
+            )}
           </button>
           <button 
             onClick={() => handleNavigation('/profile')}
@@ -130,9 +138,14 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
             </button>
             <button 
               onClick={() => handleNavigation('/request')}
-              className={`w-full text-left px-3 py-2 rounded-lg ${isActive('/request') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
+              className={`w-full text-left px-3 py-2 rounded-lg relative ${isActive('/request') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
             >
               🔄 Requests
+              {notifications > 0 && (
+                <span className="absolute top-1 right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+                  {notifications > 9 ? '9+' : notifications}
+                </span>
+              )}
             </button>
             <button 
               onClick={() => handleNavigation('/profile')}

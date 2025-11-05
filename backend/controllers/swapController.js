@@ -72,7 +72,6 @@ export const createSwapRequest = async (req, res) => {
       });
     }
 
-    // Check if requester owns the requesterSlot
     if (requesterSlot.user.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
@@ -80,7 +79,6 @@ export const createSwapRequest = async (req, res) => {
       });
     }
 
-    // Both slots must be swappable (can't request against busy/locked slots)
     if (receiverSlot.status !== 'SWAPPABLE') {
       return res.status(400).json({
         success: false,
@@ -95,7 +93,6 @@ export const createSwapRequest = async (req, res) => {
       });
     }
 
-    // Ensure no other pending request already involves either slot
     const conflict = await SwapRequest.findOne({
       status: 'pending',
       $or: [
@@ -113,8 +110,6 @@ export const createSwapRequest = async (req, res) => {
       });
     }
 
-    // Create swap request
-    // Create swap request and store original slot statuses so we can restore later
     const swapRequest = await SwapRequest.create({
       requester: req.user.id,
       receiver: receiverSlot.user,
@@ -125,7 +120,6 @@ export const createSwapRequest = async (req, res) => {
       message
     });
 
-    // Mark both slots as pending/locked so others cannot request them
     requesterSlot.status = 'SWAP_PENDING';
     receiverSlot.status = 'SWAP_PENDING';
     await requesterSlot.save();
@@ -150,9 +144,6 @@ export const createSwapRequest = async (req, res) => {
   }
 };
 
-// @desc    Accept swap request
-// @route   PUT /api/swaps/:id/accept
-// @access  Private
 export const acceptSwapRequest = async (req, res) => {
   try {
     const swapRequest = await SwapRequest.findById(req.params.id)
@@ -166,7 +157,6 @@ export const acceptSwapRequest = async (req, res) => {
       });
     }
 
-    // Make sure user is the receiver
     if (swapRequest.receiver.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
@@ -181,11 +171,9 @@ export const acceptSwapRequest = async (req, res) => {
       });
     }
 
-    // Swap the slot owners
     const requesterSlot = await Slot.findById(swapRequest.requesterSlot._id);
     const receiverSlot = await Slot.findById(swapRequest.receiverSlot._id);
 
-    // Basic safety checks: ensure slots are still pending and not modified
     if (requesterSlot.status !== 'SWAP_PENDING' || receiverSlot.status !== 'SWAP_PENDING') {
       return res.status(400).json({
         success: false,
@@ -197,14 +185,12 @@ export const acceptSwapRequest = async (req, res) => {
     requesterSlot.user = receiverSlot.user;
     receiverSlot.user = tempUser;
 
-    // After successful swap, mark slots as BUSY
     requesterSlot.status = 'BUSY';
     receiverSlot.status = 'BUSY';
 
     await requesterSlot.save();
     await receiverSlot.save();
 
-    // Cancel any other pending requests which referenced either of these slots
     const otherPending = await SwapRequest.find({
       _id: { $ne: swapRequest._id },
       status: 'pending',
@@ -217,7 +203,6 @@ export const acceptSwapRequest = async (req, res) => {
     });
 
     for (const r of otherPending) {
-      // try to restore involved slots to their recorded original statuses
       try {
         if (r.requesterSlot) {
           const s = await Slot.findById(r.requesterSlot);
@@ -234,14 +219,13 @@ export const acceptSwapRequest = async (req, res) => {
           }
         }
       } catch (err) {
-        // ignore per-slot restore errors and continue cancelling
+        // error handler ke leye
       }
 
       r.status = 'cancelled';
       await r.save();
     }
 
-    // Update swap request status
     swapRequest.status = 'accepted';
     swapRequest.respondedAt = Date.now();
     await swapRequest.save();
@@ -259,9 +243,7 @@ export const acceptSwapRequest = async (req, res) => {
   }
 };
 
-// @desc    Reject swap request
-// @route   PUT /api/swaps/:id/reject
-// @access  Private
+
 export const rejectSwapRequest = async (req, res) => {
   try {
     const swapRequest = await SwapRequest.findById(req.params.id)
@@ -275,7 +257,6 @@ export const rejectSwapRequest = async (req, res) => {
       });
     }
 
-    // Make sure user is the receiver
     if (swapRequest.receiver.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
@@ -289,9 +270,6 @@ export const rejectSwapRequest = async (req, res) => {
         message: 'This request has already been processed'
       });
     }
-
-    // Update requester slot status back to swappable
-    // Restore both slots to their original recorded statuses (or SWAPPABLE fallback)
     if (swapRequest.requesterSlot) {
       const rs = await Slot.findById(swapRequest.requesterSlot._id || swapRequest.requesterSlot);
       if (rs) {
@@ -308,7 +286,6 @@ export const rejectSwapRequest = async (req, res) => {
       }
     }
 
-    // Update swap request status
     swapRequest.status = 'rejected';
     swapRequest.respondedAt = Date.now();
     await swapRequest.save();
@@ -326,9 +303,6 @@ export const rejectSwapRequest = async (req, res) => {
   }
 };
 
-// @desc    Cancel swap request
-// @route   DELETE /api/swaps/:id
-// @access  Private
 export const cancelSwapRequest = async (req, res) => {
   try {
     const swapRequest = await SwapRequest.findById(req.params.id)
@@ -342,7 +316,6 @@ export const cancelSwapRequest = async (req, res) => {
       });
     }
 
-    // Make sure user is the requester
     if (swapRequest.requester.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
@@ -357,7 +330,6 @@ export const cancelSwapRequest = async (req, res) => {
       });
     }
 
-    // Restore both slots to original statuses recorded on the request
     if (swapRequest.requesterSlot) {
       const rs = await Slot.findById(swapRequest.requesterSlot._id || swapRequest.requesterSlot);
       if (rs) {
@@ -374,7 +346,6 @@ export const cancelSwapRequest = async (req, res) => {
       }
     }
 
-    // Update swap request status
     swapRequest.status = 'cancelled';
     await swapRequest.save();
 

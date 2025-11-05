@@ -1,8 +1,5 @@
 import Slot from '../models/Slot.js';
 
-// @desc    Get all slots for logged in user
-// @route   GET /api/slots
-// @access  Private
 export const getMySlots = async (req, res) => {
   try {
     const slots = await Slot.find({ user: req.user.id }).sort({ date: 1, startTime: 1 });
@@ -20,9 +17,6 @@ export const getMySlots = async (req, res) => {
   }
 };
 
-// @desc    Get all swappable slots (marketplace)
-// @route   GET /api/slots/marketplace
-// @access  Private
 export const getMarketplaceSlots = async (req, res) => {
   try {
     const { category, date, search } = req.query;
@@ -69,9 +63,6 @@ export const getMarketplaceSlots = async (req, res) => {
   }
 };
 
-// @desc    Get single slot
-// @route   GET /api/slots/:id
-// @access  Private
 export const getSlot = async (req, res) => {
   try {
     const slot = await Slot.findById(req.params.id).populate('user', 'fullName email avatar');
@@ -95,9 +86,6 @@ export const getSlot = async (req, res) => {
   }
 };
 
-// @desc    Create new slot
-// @route   POST /api/slots
-// @access  Private
 export const createSlot = async (req, res) => {
   try {
     req.body.user = req.user.id;
@@ -117,9 +105,6 @@ export const createSlot = async (req, res) => {
   }
 };
 
-// @desc    Update slot
-// @route   PUT /api/slots/:id
-// @access  Private
 export const updateSlot = async (req, res) => {
   try {
     let slot = await Slot.findById(req.params.id);
@@ -131,7 +116,6 @@ export const updateSlot = async (req, res) => {
       });
     }
 
-    // Make sure user owns the slot
     if (slot.user.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
@@ -157,9 +141,6 @@ export const updateSlot = async (req, res) => {
   }
 };
 
-// @desc    Delete slot
-// @route   DELETE /api/slots/:id
-// @access  Private
 export const deleteSlot = async (req, res) => {
   try {
     const slot = await Slot.findById(req.params.id);
@@ -171,7 +152,6 @@ export const deleteSlot = async (req, res) => {
       });
     }
 
-    // Make sure user owns the slot
     if (slot.user.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,

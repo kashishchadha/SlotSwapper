@@ -21,7 +21,6 @@ const swapRequestSchema = new mongoose.Schema({
     ref: 'Slot',
     required: true
   },
-  // store the slot statuses at the time of the request so we can restore them
   requesterSlotStatus: {
     type: String,
     trim: true
@@ -46,7 +45,6 @@ const swapRequestSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster queries
 swapRequestSchema.index({ requester: 1, status: 1 });
 swapRequestSchema.index({ receiver: 1, status: 1 });
 

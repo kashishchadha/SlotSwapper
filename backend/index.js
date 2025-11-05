@@ -10,7 +10,6 @@ import swapRoutes from './routes/swapRoutes.js';
 
 const app = express();
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
@@ -18,7 +17,6 @@ app.use(cors({
   credentials: true
 }));
 
-// Routes
 app.get('/', (req, res) => {
   res.json({
     success: true,

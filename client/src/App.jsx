@@ -8,6 +8,7 @@ import Calender from './pages/dashboard/calender'
 import Market from './pages/marketplace/Markets'
 import Request from './pages/requests/Request'
 import Profile from './pages/profile/Profile'
+import NotificationBell from './components/common/NotificationBell'
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -60,6 +61,7 @@ function App() {
             
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+          <NotificationBell />
         </BrowserRouter>
         <ToastContainer 
           position="top-right"

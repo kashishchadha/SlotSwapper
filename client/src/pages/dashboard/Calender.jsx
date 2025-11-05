@@ -45,7 +45,7 @@ const EventCard = ({ event, onStatusChange, onDelete }) => {
   }
 
   return (
-    <div className="glass-card p-4">
+    <div className="glass-card p-4 hover:shadow-xl hover:scale-105 hover:-translate-y-1 transition-all duration-300">
       <div className="text-sm text-gray-500 mb-2">{formatDate(event.date)}</div>
       <div className="text-xs text-gray-400 mb-1">{event.startTime} - {event.endTime}</div>
       <div className="font-semibold text-lg mb-2">{event.title}</div>
@@ -57,14 +57,14 @@ const EventCard = ({ event, onStatusChange, onDelete }) => {
           {event.status === 'BUSY' && (
             <button 
               onClick={handleMakeSwappable}
-              className="text-sm bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-full transition"
+              className="text-sm bg-green-100 hover:bg-green-200 hover:scale-105 text-green-700 px-3 py-1 rounded-full transition-all duration-200"
             >
               Make Swappable
             </button>
           )}
           <button 
             onClick={handleDelete}
-            className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-full transition"
+            className="text-sm bg-red-100 hover:bg-red-200 hover:scale-105 text-red-700 px-3 py-1 rounded-full transition-all duration-200"
           >
             Delete
           </button>

@@ -43,25 +43,25 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         <nav className="space-y-3 px-3">
           <button 
             onClick={() => handleNavigation('/dashboard')}
-            className={`w-full text-left px-3 py-2 rounded-lg ${isActive('/dashboard') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
+            className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${isActive('/dashboard') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 hover:scale-105 text-gray-700'}`}
           >
             📅 My Calendar
           </button>
           <button 
             onClick={() => handleNavigation('/market')}
-            className={`w-full text-left px-3 py-2 rounded-lg ${isActive('/market') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
+            className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${isActive('/market') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 hover:scale-105 text-gray-700'}`}
           >
             🏪 Marketplace
           </button>
           <button 
             onClick={() => handleNavigation('/request')}
-            className={`w-full text-left px-3 py-2 rounded-lg ${isActive('/request') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
+            className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${isActive('/request') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 hover:scale-105 text-gray-700'}`}
           >
             🔄 Requests
           </button>
           <button 
             onClick={() => handleNavigation('/profile')}
-            className={`w-full text-left px-3 py-2 rounded-lg ${isActive('/profile') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 text-gray-700'}`}
+            className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${isActive('/profile') ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-gray-100 hover:scale-105 text-gray-700'}`}
           >
             👤 Profile
           </button>
@@ -69,8 +69,8 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       </div>
 
       <div className="pt-6 border-t border-gray-100 px-3">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleNavigation('/profile')}>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center text-2xl">
+        <div className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-all duration-200 hover:scale-105" onClick={() => handleNavigation('/profile')}>
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center text-2xl hover:scale-110 transition-transform duration-200">
             {user?.avatar || '👤'}
           </div>
           <div>
@@ -80,7 +80,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         </div>
         <button 
           onClick={handleLogout}
-          className="mt-4 mb-2 cursor-pointer text-sm text-gray-600 flex items-center gap-2 hover:text-red-600 transition-colors"
+          className="mt-4 mb-2 cursor-pointer text-sm text-gray-600 flex items-center gap-2 hover:text-red-600 hover:scale-105 transition-all duration-200"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
             <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

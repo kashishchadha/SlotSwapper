@@ -15,9 +15,9 @@ const RequestCard = ({ request, type, onAccept, onReject, onCancel }) => {
   const theirSlot = isIncoming ? request.requesterSlot : request.receiverSlot
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:scale-105 hover:-translate-y-1 transition-all duration-300">
       <div className="flex items-start gap-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center text-2xl">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center text-2xl hover:scale-110 transition-transform duration-200">
           {otherUser?.avatar || '👤'}
         </div>
         <div className="flex-1">
@@ -29,20 +29,20 @@ const RequestCard = ({ request, type, onAccept, onReject, onCancel }) => {
           </div>
 
           <div className="space-y-2 text-sm">
-            <div className="bg-blue-50 p-3 rounded-lg">
+            <div className="bg-blue-50 p-3 rounded-lg hover:bg-blue-100 transition-colors duration-200">
               <div className="font-medium text-gray-700 mb-1">Your Slot:</div>
               <div className="text-gray-900">{yourSlot?.title}</div>
               <div className="text-gray-600">{formatDate(yourSlot?.date)} • {yourSlot?.startTime} - {yourSlot?.endTime}</div>
             </div>
 
-            <div className="bg-green-50 p-3 rounded-lg">
+            <div className="bg-green-50 p-3 rounded-lg hover:bg-green-100 transition-colors duration-200">
               <div className="font-medium text-gray-700 mb-1">Their Slot:</div>
               <div className="text-gray-900">{theirSlot?.title}</div>
               <div className="text-gray-600">{formatDate(theirSlot?.date)} • {theirSlot?.startTime} - {theirSlot?.endTime}</div>
             </div>
 
             {request.message && (
-              <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                 <div className="font-medium text-gray-700 mb-1">Message:</div>
                 <div className="text-gray-600">{request.message}</div>
               </div>
@@ -56,13 +56,13 @@ const RequestCard = ({ request, type, onAccept, onReject, onCancel }) => {
           <>
             <button
               onClick={() => onAccept(request._id)}
-              className="flex-1 px-4 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors text-sm"
+              className="flex-1 px-4 py-2.5 rounded-full bg-indigo-600 hover:bg-indigo-700 hover:scale-105 text-white font-medium transition-all duration-200 text-sm shadow-md hover:shadow-lg"
             >
               Accept
             </button>
             <button
               onClick={() => onReject(request._id)}
-              className="flex-1 px-4 py-2.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium transition-colors text-sm"
+              className="flex-1 px-4 py-2.5 rounded-full bg-gray-100 hover:bg-gray-200 hover:scale-105 text-gray-700 font-medium transition-all duration-200 text-sm"
             >
               Reject
             </button>
@@ -72,7 +72,7 @@ const RequestCard = ({ request, type, onAccept, onReject, onCancel }) => {
         {!isIncoming && request.status === 'pending' && (
           <button
             onClick={() => onCancel(request._id)}
-            className="flex-1 px-4 py-2.5 rounded-full bg-red-100 hover:bg-red-200 text-red-700 font-medium transition-colors text-sm"
+            className="flex-1 px-4 py-2.5 rounded-full bg-red-100 hover:bg-red-200 hover:scale-105 text-red-700 font-medium transition-all duration-200 text-sm"
           >
             Cancel Request
           </button>

@@ -49,15 +49,30 @@ SlotSwapper is a lightweight application designed to let users create, manage, a
 
 ---
 
-## 📸 Example Screenshots
+## 📸 Screenshots
 
-(Replace these with actual screenshots from your client/public or Screenshots/ directory)
+<div align="center">
 
-- Home / Slot list
-- Create Slot form
-- Slot details & swap request modal
-- User profile / my slots
+### 🏠 Signup
+<img src="./screenshots/signup.png" alt="Auth page" width="800" />
 
+### ✍️ Signin
+<img src="./screenshots/signin.png" alt="Auth page" width="800" />
+
+### 📖 Dashboard
+<img src="./screenshots/dashboard.png" alt="Dashboard" width="800" />
+
+### 📱 Marketplace
+<img src="./screenshots/marketplace.png" alt="marketplace" width="800" />
+
+### 📱 Request
+<img src="./screenshots/request.png" alt="Request" width="800" />
+
+### 📱 Profile
+<img src="./screenshots/profile.png" alt="profile" width="800" />
+
+
+</div>
 ---
 
 ## 🛠️ Tech Stack

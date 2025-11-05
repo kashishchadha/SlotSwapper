@@ -1,7 +1,24 @@
 import React from 'react'
 import BlurText from '../../components/common/BlurText'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 const Landing = () => {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard')
+    } else {
+      navigate('/auth')
+    }
+  }
+
+  const handleSignIn = () => {
+    navigate('/auth')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#e0e7ff] via-[#ede9fe] to-[#f5f3ff]">
       {/* Header */}
@@ -30,8 +47,10 @@ const Landing = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <button className="text-gray-700 hover:text-gray-900 px-4 py-2">Sign in</button>
-            <button className="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-sm">
+            <button onClick={handleSignIn} className="text-gray-700 hover:text-gray-900 px-4 py-2">
+              {isAuthenticated ? 'Dashboard' : 'Sign in'}
+            </button>
+            <button onClick={handleGetStarted} className="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-sm">
               Get started
             </button>
           </div>
@@ -52,7 +71,7 @@ const Landing = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
-            <button className="px-7 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-lg">
+            <button onClick={handleGetStarted} className="px-7 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-lg">
               Start for free
             </button>
             <button className="px-7 py-3 rounded-lg bg-white/70 backdrop-blur-sm border border-gray-300 text-gray-700 font-medium hover:bg-white hover:border-indigo-300 transition shadow-md">
@@ -208,7 +227,7 @@ const Landing = () => {
           <p className="text-gray-700 mb-8 text-lg">
             Join teams already using SlotSwapper to manage their time better.
           </p>
-          <button className="px-8 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-xl">
+          <button onClick={handleGetStarted} className="px-8 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-xl">
             Get started free
           </button>
         </div>

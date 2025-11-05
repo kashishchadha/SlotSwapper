@@ -1,83 +1,231 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import API from '../../api/axios'
+import { toast } from 'react-toastify'
+import { useAuth } from '../../context/AuthContext'
+import Sidebar from '../../components/layout/Sidebar'
 
-const sampleSlots = [
-  { id: 1, name: 'Jane D.', team: 'Marketing Team', title: 'Weekly Design Sync', date: 'Oct 26, 10:00 AM', avatar: '👩' },
-  { id: 2, name: 'John S.', team: 'Engineering', title: 'Project Kick-off', date: 'Oct 26, 2:00 PM', avatar: '👨' },
-  { id: 3, name: 'Emily R.', team: 'Product', title: 'Client Presentation', date: 'Oct 27, 9:00 AM', avatar: '👩' },
-  { id: 4, name: 'Michael B.', team: 'Engineering', title: 'Eng Stand-up', date: 'Oct 27, 11:00 AM', avatar: '👨' },
-  { id: 5, name: 'Sarah L.', team: 'Marketing Team', title: 'Marketing Brainstorm', date: 'Oct 28, 1:00 PM', avatar: '👩' },
-  { id: 6, name: 'David C.', team: 'Sales', title: '1-on-1 with Manager', date: 'Oct 29, 4:00 PM', avatar: '👨' },
-  { id: 7, name: 'Laura M.', team: 'Design', title: 'UX Review Session', date: 'Oct 30, 11:30 AM', avatar: '👩' },
-  { id: 8, name: 'Kevin W.', team: 'Support', title: 'All-Hands Meeting', date: 'Oct 31, 3:00 PM', avatar: '👨' },
-]
+const SlotCard = ({ slot, onRequestSwap }) => {
+  const formatDate = (date) => {
+    const d = new Date(date)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
 
-const NavBar = () => (
-  <header className="w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 px-6 py-4">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="logoGradNav" x1="0" x2="1">
-              <stop offset="0%" stopColor="#6366f1" />
-              <stop offset="100%" stopColor="#7c3aed" />
-            </linearGradient>
-          </defs>
-          <rect width="48" height="48" rx="10" fill="url(#logoGradNav)" />
-          <path d="M14 18h20" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M34 18l-4 4 4 4" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          <path d="M34 30H14" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M14 30l4-4-4-4" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </svg>
-        <div className="text-lg font-semibold">SlotSwapper</div>
+  return (
+    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center text-2xl">
+          {slot.user?.avatar || '👤'}
+        </div>
+        <div>
+          <div className="font-semibold text-gray-900">{slot.user?.fullName || 'User'}</div>
+          <div className="text-sm text-gray-500">{slot.category}</div>
+        </div>
       </div>
 
-      <nav className="hidden md:flex items-center gap-8 text-sm">
-        <button className="text-indigo-600 font-medium">Marketplace</button>
-        <button className="text-gray-600 hover:text-gray-800">My Slots</button>
-        <button className="text-gray-600 hover:text-gray-800">Profile</button>
-      </nav>
+      <div className="font-bold text-gray-900 mb-1">{slot.title}</div>
+      <div className="text-sm text-gray-500 mb-2">{formatDate(slot.date)}</div>
+      <div className="text-sm text-gray-600 mb-2">{slot.startTime} - {slot.endTime}</div>
+      {slot.location && <div className="text-sm text-gray-600 mb-2">📍 {slot.location}</div>}
+      {slot.description && <div className="text-sm text-gray-500 mb-4">{slot.description}</div>}
 
-      <div className="flex items-center gap-4">
-        <button className="hidden md:flex w-8 h-8 items-center justify-center text-gray-600">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center">👤</div>
+      <button 
+        onClick={() => onRequestSwap(slot)}
+        className="w-full bg-indigo-500 hover:bg-indigo-700 text-white py-2.5 rounded-full font-medium transition-colors text-sm"
+      >
+        Request Swap
+      </button>
+    </div>
+  )
+}
+
+const SwapRequestModal = ({ isOpen, onClose, targetSlot, userSlots }) => {
+  const [selectedSlotId, setSelectedSlotId] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!selectedSlotId) {
+      toast.error('Please select a slot to offer')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await API.post('/swaps', {
+        requesterSlotId: selectedSlotId,
+        receiverSlotId: targetSlot._id,
+        message
+      })
+      toast.success('Swap request sent successfully!')
+      onClose()
+      setSelectedSlotId('')
+      setMessage('')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create swap request')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  const swappableSlots = userSlots.filter(s => s.status === 'SWAPPABLE')
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Request Swap</h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          {swappableSlots.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">You don't have any swappable slots. Create a slot and mark it as swappable first.</p>
+              <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded-lg">Close</button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Target Slot</label>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="font-semibold">{targetSlot?.title}</div>
+                  <div className="text-sm text-gray-600">{targetSlot?.startTime} - {targetSlot?.endTime}</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Your Slot to Offer *</label>
+                <select
+                  required
+                  value={selectedSlotId}
+                  onChange={(e) => setSelectedSlotId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Select a slot...</option>
+                  {swappableSlots.map(slot => (
+                    <option key={slot._id} value={slot._id}>
+                      {slot.title} - {slot.startTime} to {slot.endTime}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Message (Optional)</label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  rows="3"
+                  placeholder="Why do you want to swap..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  {loading ? 'Sending...' : 'Send Request'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
-  </header>
-)
-
-const SlotCard = ({ slot }) => (
-  <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-    <div className="flex items-start gap-3 mb-4">
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-2xl">
-        {slot.avatar}
-      </div>
-      <div>
-        <div className="font-semibold text-gray-900">{slot.name}</div>
-        <div className="text-sm text-gray-500">{slot.team}</div>
-      </div>
-    </div>
-
-    <div className="font-bold text-gray-900 mb-1">{slot.title}</div>
-    <div className="text-sm text-gray-500 mb-4">{slot.date}</div>
-
-    <button className="w-30 bg-indigo-500 hover:bg-indigo-700 text-white py-2.5 rounded-full font-medium transition-colors text-sm">
-      Request Swap
-    </button>
-  </div>
-)
+  )
+}
 
 const Markets = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#e6eefc] via-[#eef4ff] to-[#fbfdff]">
-      <NavBar />
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [slots, setSlots] = useState([])
+  const [userSlots, setUserSlots] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [category, setCategory] = useState('All')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedSlot, setSelectedSlot] = useState(null)
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-8">Marketplace</h1>
+  const fetchMarketplaceSlots = async () => {
+    try {
+      setLoading(true)
+      const params = {}
+      if (searchQuery) params.search = searchQuery
+      if (category && category !== 'All') params.category = category
+
+      const { data } = await API.get('/slots/marketplace', { params })
+      setSlots(data.slots || [])
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to fetch marketplace slots')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchUserSlots = async () => {
+    try {
+      const { data } = await API.get('/slots')
+      setUserSlots(data.slots || [])
+    } catch (error) {
+      console.error('Failed to fetch user slots:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchMarketplaceSlots()
+    fetchUserSlots()
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchMarketplaceSlots()
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery, category])
+
+  const handleRequestSwap = (slot) => {
+    setSelectedSlot(slot)
+    setModalOpen(true)
+  }
+
+  return (
+    <div className="flex">
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <main className="flex-1 p-4 lg:p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <button
+              className="lg:hidden mr-3 p-2 rounded-md bg-white/90 shadow-sm"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 6H20" stroke="#334155" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4 12H20" stroke="#334155" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M4 18H20" stroke="#334155" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <h1 className="text-2xl sm:text-3xl font-extrabold">Marketplace</h1>
+          </div>
+        </div>
 
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 mb-8">
           <div className="flex-1">
@@ -88,6 +236,8 @@ const Markets = () => {
               </svg>
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for slots by title or user..."
                 className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -95,27 +245,47 @@ const Markets = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-6 py-3 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-              Date
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <button className="px-6 py-3 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-              Category
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="px-6 py-3 rounded-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="All">All Categories</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Shift">Shift</option>
+              <option value="Class">Class</option>
+              <option value="Event">Event</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sampleSlots.map(slot => (
-            <SlotCard key={slot.id} slot={slot} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        ) : slots.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No swappable slots available at the moment.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {slots.map(slot => (
+              <SlotCard key={slot._id} slot={slot} onRequestSwap={handleRequestSwap} />
+            ))}
+          </div>
+        )}
       </main>
+
+      <SwapRequestModal
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false)
+          setSelectedSlot(null)
+        }}
+        targetSlot={selectedSlot}
+        userSlots={userSlots}
+      />
     </div>
   )
 }

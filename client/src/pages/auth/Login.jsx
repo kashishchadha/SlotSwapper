@@ -1,4 +1,7 @@
 import React, { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 const Field = ({ label, name, type = 'text', value, onChange, placeholder }) => (
   <label className="block text-sm text-gray-600">
@@ -18,16 +21,34 @@ const Login = () => {
   const [mode, setMode] = useState('login') 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
   const [showPass, setShowPass] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const { login, register } = useAuth()
+  const navigate = useNavigate()
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
+    setLoading(true)
+    
     if (mode === 'login') {
-      console.log('login', { email: form.email, password: form.password })
+      const result = await login(form.email, form.password)
+      if (result.success) {
+        navigate('/dashboard')
+      }
     } else {
-      console.log('signup', form)
+      if (form.password !== form.confirm) {
+        toast.error('Passwords do not match')
+        setLoading(false)
+        return
+      }
+      const result = await register(form.name, form.email, form.password)
+      if (result.success) {
+        navigate('/dashboard')
+      }
     }
+    
+    setLoading(false)
   }
 
   return (
@@ -107,9 +128,10 @@ const Login = () => {
             <div>
               <button
                 type="submit"
-                className="w-full bg-indigo-600 cursor-pointer text-white py-3 rounded-full font-semibold hover:bg-indigo-700 transition"
+                disabled={loading}
+                className="w-full bg-indigo-600 cursor-pointer text-white py-3 rounded-full font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {mode === 'login' ? 'Log In' : 'Create Account'}
+                {loading ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Create Account'}
               </button>
             </div>
 

@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 const Field = ({ label, name, type = 'text', value, onChange, placeholder }) => (
@@ -18,12 +18,19 @@ const Field = ({ label, name, type = 'text', value, onChange, placeholder }) => 
 )
 
 const Login = () => {
-  const [mode, setMode] = useState('login') 
+  const location = useLocation()
+  const [mode, setMode] = useState(location.state?.mode || 'login') 
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const { login, register } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (location.state?.mode) {
+      setMode(location.state.mode)
+    }
+  }, [location.state])
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from '../../components/layout/Sidebar'
 import API from '../../api/axios'
 import { toast } from 'react-toastify'
-import { useAuth } from '../../context/AuthContext'
 
 const StatusBadge = ({ status }) => {
   const map = {
@@ -253,7 +252,6 @@ const Calender = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [slots, setSlots] = useState([])
   const [loading, setLoading] = useState(true)
-  const { user } = useAuth()
 
   const fetchSlots = async () => {
     try {

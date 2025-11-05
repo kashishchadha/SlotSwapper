@@ -16,7 +16,11 @@ const Landing = () => {
   }
 
   const handleSignIn = () => {
-    navigate('/auth')
+    navigate('/auth', { state: { mode: 'login' } })
+  }
+
+  const handleSignUp = () => {
+    navigate('/auth', { state: { mode: 'signup' } })
   }
 
   return (
@@ -47,12 +51,20 @@ const Landing = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <button onClick={handleSignIn} className="text-gray-700 hover:text-gray-900 px-4 py-2">
-              {isAuthenticated ? 'Dashboard' : 'Sign in'}
-            </button>
-            <button onClick={handleGetStarted} className="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-sm">
-              Get started
-            </button>
+            {isAuthenticated ? (
+              <button onClick={() => navigate('/dashboard')} className="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-sm">
+                Dashboard
+              </button>
+            ) : (
+              <>
+                <button onClick={handleSignIn} className="text-gray-700 hover:text-indigo-600 px-4 py-2 font-medium transition">
+                  Login
+                </button>
+                <button onClick={handleSignUp} className="px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-medium hover:from-indigo-700 hover:to-violet-700 transition shadow-sm">
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>

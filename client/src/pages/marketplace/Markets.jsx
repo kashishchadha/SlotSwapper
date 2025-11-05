@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useCallback } from 'react'
 import API from '../../api/axios'
 import { toast } from 'react-toastify'
-import { useAuth } from '../../context/AuthContext'
 import Sidebar from '../../components/layout/Sidebar'
 
 const SlotCard = ({ slot, onRequestSwap }) => {
@@ -163,7 +161,7 @@ const Markets = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedSlot, setSelectedSlot] = useState(null)
 
-  const fetchMarketplaceSlots = async () => {
+  const fetchMarketplaceSlots = useCallback(async () => {
     try {
       setLoading(true)
       const params = {}
@@ -177,7 +175,7 @@ const Markets = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchQuery, category])
 
   const fetchUserSlots = async () => {
     try {
@@ -191,14 +189,14 @@ const Markets = () => {
   useEffect(() => {
     fetchMarketplaceSlots()
     fetchUserSlots()
-  }, [])
+  }, [fetchMarketplaceSlots])
 
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchMarketplaceSlots()
     }, 500)
     return () => clearTimeout(timer)
-  }, [searchQuery, category])
+  }, [fetchMarketplaceSlots])
 
   const handleRequestSwap = (slot) => {
     setSelectedSlot(slot)

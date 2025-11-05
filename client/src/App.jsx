@@ -8,7 +8,6 @@ import Calender from './pages/dashboard/calender'
 import Market from './pages/marketplace/Markets'
 import Request from './pages/requests/Request'
 import Profile from './pages/profile/Profile'
-import Landing from './pages/landing/Landing'
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -52,15 +51,13 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
             
             <Route path="/dashboard" element={<ProtectedRoute><Calender /></ProtectedRoute>} />
             <Route path="/market" element={<ProtectedRoute><Market /></ProtectedRoute>} />
             <Route path="/request" element={<ProtectedRoute><Request /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             
-            {/* Redirect any unknown route to home */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>
